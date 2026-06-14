@@ -15,8 +15,8 @@ const client = new TransactionalEmailsApi();
 client.setApiKey(TransactionalEmailsApiApiKeys.apiKey, apiKey);
 
 export type ContactEmailData = {
-  name: string;
-  company: string;
+  nameOrCompany: string;
+  fiscalCondition: "Responsable inscripto" | "Monotributista";
   email: string;
   phone: string;
   message: string;
@@ -37,12 +37,12 @@ function escapeHtml(value: string): string {
 }
 
 export async function sendContactEmail(data: ContactEmailData) {
-  const name = escapeHtml(data.name);
-  const company = escapeHtml(data.company);
+  const nameOrCompany = escapeHtml(data.nameOrCompany);
+  const fiscalCondition = escapeHtml(data.fiscalCondition);
   const email = escapeHtml(data.email);
   const phone = escapeHtml(data.phone);
   const message = escapeHtml(data.message).replace(/\r?\n/g, "<br />");
-  const subjectName = (data.company || data.name).replace(/[\r\n]+/g, " ");
+  const subjectName = data.nameOrCompany.replace(/[\r\n]+/g, " ");
 
   const response: { body: CreateSmtpEmail } = await client.sendTransacEmail({
     sender: {
@@ -58,8 +58,8 @@ export async function sendContactEmail(data: ContactEmailData) {
     htmlContent: `
       <h2>Nueva consulta desde CGX International</h2>
 
-      <p><strong>Nombre:</strong> ${name}</p>
-      <p><strong>Empresa:</strong> ${company}</p>
+      <p><strong>Nombre / Empresa:</strong> ${nameOrCompany}</p>
+      <p><strong>Condicion fiscal:</strong> ${fiscalCondition}</p>
       <p><strong>Email:</strong> ${email}</p>
       <p><strong>Telefono:</strong> ${phone}</p>
 
